@@ -1,14 +1,6 @@
 LOCATIONS = [
-    {
-        "id": 1,
-        "name": "Nashville North",
-        "address": "8422 Johnson Pike"
-    },
-    {
-        "id": 2,
-        "name": "Nashville South",
-        "address": "209 Emory Drive"
-    }
+    {"id": 1, "name": "Nashville North", "address": "8422 Johnson Pike"},
+    {"id": 2, "name": "Nashville South", "address": "209 Emory Drive"},
 ]
 
 
@@ -32,7 +24,7 @@ def get_single_location(id):
 
 
 def create_location(location):
-        # Get the id value of the last animal in the list
+    # Get the id value of the last animal in the list
     max_id = LOCATIONS[-1]["id"]
 
     # Add 1 to whatever that number is
@@ -62,3 +54,13 @@ def delete_location(id):
     # If the animal was found, use pop(int) to remove it from list
     if location_index >= 0:
         LOCATIONS.pop(location_index)
+
+
+def update_location(id, new_location):
+    # Iterate the ANIMALS list, but use enumerate() so that
+    # you can access the index value of each item.
+    for index, location in enumerate(LOCATIONS):
+        if location["id"] == id:
+            # Found the location. Update the value.
+            LOCATIONS[index] = new_location
+            break
