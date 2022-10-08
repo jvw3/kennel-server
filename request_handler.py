@@ -1,5 +1,6 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
+#? These methods are first created in their respective views. They are then imported to init.py and then they are imported to request_handler.py.
 from views import (
     get_all_animals,
     get_single_animal,
@@ -23,7 +24,7 @@ from views import (
     update_location,
 )
 
-# from views import __all__
+
 
 
 # Here's a class. It inherits from another class.
@@ -32,6 +33,8 @@ from views import (
 # common purpose is to respond to HTTP requests from a client.
 class HandleRequests(BaseHTTPRequestHandler):
     """Controls the functionality of any GET, PUT, POST, DELETE requests to the server"""
+    #? This is a Docstring it should be at the beginning of all classes and functions
+    #? It gives a description of the class or function
 
     def parse_url(self, path):
         # Just like splitting a string in JavaScript. If the
@@ -42,25 +45,22 @@ class HandleRequests(BaseHTTPRequestHandler):
         resource = path_params[1]
         id = None
 
-        # Try to get the item at index 2
+        #? Try to get the item at index 2
         try:
-            # Convert the string "1" to the integer 1
-            # This is the new parseInt()
+            #? Convert the string "1" to the integer 1
+            #? This is the new parseInt()
             id = int(path_params[2])
         except IndexError:
             pass  # No route parameter exists: /animals
         except ValueError:
             pass  # Request had trailing slash: /animals/
 
-        return (resource, id)  # This is a tuple
+        return (resource, id)  #? This is a tuple
 
-    # This is a Docstring it should be at the beginning of all classes and functions
-    # It gives a description of the class or function
+    #? Here's a class function
 
-    # Here's a class function
-
-    # Here's a method on the class that overrides the parent's method.
-    # It handles any GET request.
+    #? Here's a method on the class that overrides the parent's method.
+    #? It handles any GET request.
     def do_GET(self):
         """Handles GET requests to the server"""
         self._set_headers(200)
@@ -73,12 +73,26 @@ class HandleRequests(BaseHTTPRequestHandler):
             if id is not None:
                 response = get_single_animal(id)
 
+                if response is not None:
+                    self._set_headers(200)
+
+                if response is None:
+                    self._set_headers(404)
+                    response = {"message": f"Animal {id} is out playing right now"}
+
             else:
                 response = get_all_animals()
 
         if resource == "locations":
             if id is not None:
                 response = get_single_location(id)
+
+                if response is not None:
+                    self._set_headers(200)
+
+                if response is None:
+                    self._set_headers(404)
+                    response = {"message": f"Location-{id} doesn't exist"}
 
             else:
                 response = get_all_locations()
@@ -87,12 +101,26 @@ class HandleRequests(BaseHTTPRequestHandler):
             if id is not None:
                 response = get_single_employee(id)
 
+                if response is not None:
+                    self._set_headers(200)
+
+                if response is None:
+                    self._set_headers(404)
+                    response = {"message": f"Employee-{id} does not exist"}
+
             else:
                 response = get_all_employees()
 
         if resource == "customers":
             if id is not None:
                 response = get_single_customer(id)
+
+                if response is not None:
+                    self._set_headers(200)
+
+                if response is None:
+                    self._set_headers(404)
+                    response = {"message": f"Customer-{id} does not exist"}
 
             else:
                 response = get_all_customers()
