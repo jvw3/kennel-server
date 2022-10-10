@@ -2,6 +2,7 @@ import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # ? These methods are first created in their respective views. They are then imported to init.py and then they are imported to request_handler.py.
+
 from views import (
     get_all_animals,
     get_single_animal,
@@ -150,7 +151,6 @@ class HandleRequests(BaseHTTPRequestHandler):
     #! Here's a method on the class that overrides the parent's method.
     # ? It handles any POST request.
     def do_POST(self):
-        self._set_headers(201)
         content_len = int(self.headers.get("content-length", 0))
         post_body = self.rfile.read(content_len)
 
@@ -241,40 +241,42 @@ class HandleRequests(BaseHTTPRequestHandler):
 
     def do_DELETE(self):
         # Set a 204 response code
-        self._set_headers(204)
+        delete_response = ""
 
         # Parse the URL
         (resource, id) = self.parse_url(self.path)
 
         # Delete a single animal from the list
         if resource == "animals":
+            self._set_headers(204)
             delete_animal(id)
 
         # Encode the new animal and send in response
 
-        self.wfile.write("".encode())
         # Delete a single animal from the list
-        if resource == "locations":
+        elif resource == "locations":
+            self._set_headers(204)
             delete_location(id)
 
         # Encode the new animal and send in response
-        self.wfile.write("".encode())
 
         # Delete a single animal from the list
         if resource == "employees":
+            self._set_headers(204)
             delete_employee(id)
 
         # Encode the new animal and send in response
-        self.wfile.write("".encode())
 
         # Delete a single animal from the list
         if resource == "customers":
             self._set_headers(405)
-            delete_text = {message: "hello"}
-            delete_customer(id)
+            delete_response = {"message": "You cannot delete any customer."}
+            # delete_customer(id)
 
-        # Encode the new animal and send in response
-        self.wfile.write("".encode())
+        # Encode the new anitmal and send in response
+
+        self.wfile.write(json.dumps(delete_response).encode())
+        # self.wfile.write(delete_response.encode())
 
     # A method that handles any PUT request.
     def do_PUT(self):
