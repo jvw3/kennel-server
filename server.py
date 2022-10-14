@@ -2,37 +2,8 @@ import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # ? These methods are first created in their respective views. They are then imported to init.py and then they are imported to request_handler.py.
+from repository import all, delete, retrieve, create, update
 
-from views import (
-    get_all_animals,
-    get_single_animal,
-    get_all_locations,
-    get_single_location,
-    get_all_employees,
-    get_single_employee,
-    get_all_customers,
-    get_single_customer,
-    create_animal,
-    create_location,
-    create_employee,
-    create_customer,
-    delete_animal,
-    delete_location,
-    delete_employee,
-    delete_customer,
-    update_animal,
-    update_customer,
-    update_employee,
-    update_location,
-)
-
-
-method_mapper = {
-    "animals": {"single": get_single_animal, "all": get_all_animals},
-    "locations": {"single": get_single_location, "all": get_all_locations},
-    "customers": {"single": get_single_customer, "all": get_all_customers},
-    "employees": {"single": get_single_employee, "all": get_all_employees},
-}
 # Here's a class. It inherits from another class.
 # For now, think of a class as a container for functions that
 # work together for a common purpose. In this case, that
@@ -66,7 +37,7 @@ class HandleRequests(BaseHTTPRequestHandler):
 
     def get_all_or_single(self, resource, id):
         if id is not None:
-            response = method_mapper[resource]["single"](id)
+            response = retrieve(id, resource)
 
             if response is not None:
                 self._set_headers(200)
@@ -75,7 +46,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                 response = ""
         else:
             self._set_headers(200)
-            response = method_mapper[resource]["all"]()
+            response = all(resource)
 
         return response
 
@@ -87,92 +58,6 @@ class HandleRequests(BaseHTTPRequestHandler):
         (resource, id) = self.parse_url(self.path)
         response = self.get_all_or_single(resource, id)
         self.wfile.write(json.dumps(response).encode())
-
-    # def do_GET(self):
-    #     """Handles GET requests to the server"""
-    #     self._set_headers(200)
-    #     response = {}  # Default response
-
-    #     #! Parse the URL and capture the tuple that is returned
-    #     (resource, id) = self.parse_url(self.path)
-
-    #     # ? If the resource is "animals", and
-    #     # ? if id is not None/Null, the response will be get_single_animal(id)
-    #     # ? if the response is not None/Null, the request header will be set to 200.
-    #     # ? if the response is None/Null, the request header will be set to 404. and the response will be a message.
-    #     # ? else, the response will be the return value of the get_all_animals method.
-    #     if resource == "animals":
-    #         if id is not None:
-    #             response = get_single_animal(id)
-
-    #             if response is not None:
-    #                 self._set_headers(200)
-
-    #             if response is None:
-    #                 self._set_headers(404)
-    #                 response = {"message": f"Animal {id} is out playing right now"}
-
-    #         else:
-    #             response = get_all_animals()
-
-    #     # ? If the resource is "locations", and
-    #     # ? if id is not None/Null, the response will be get_single_location(id)
-    #     # ? if the response is not None/Null, the request header will be set to 200.
-    #     # ? if the response is None/Null, the request header will be set to 404. and the response will be a message.
-    #     # ? else, the response will be the return value of the get_all_locations method.
-    #     if resource == "locations":
-    #         if id is not None:
-    #             response = get_single_location(id)
-
-    #             if response is not None:
-    #                 self._set_headers(200)
-
-    #             if response is None:
-    #                 self._set_headers(404)
-    #                 response = {"message": f"Location-{id} doesn't exist"}
-
-    #         else:
-    #             response = get_all_locations()
-
-    #     # ? If the resource is "employees", and
-    #     # ? if id is not None/Null, the response will be get_single_employee(id)
-    #     # ? if the response is not None/Null, the request header will be set to 200.
-    #     # ? if the response is None/Null, the request header will be set to 404. and the response will be a message.
-    #     # ? else, the response will be the return value of the get_all_employees method.
-    #     if resource == "employees":
-    #         if id is not None:
-    #             response = get_single_employee(id)
-
-    #             if response is not None:
-    #                 self._set_headers(200)
-
-    #             if response is None:
-    #                 self._set_headers(404)
-    #                 response = {"message": f"Employee-{id} does not exist"}
-
-    #         else:
-    #             response = get_all_employees()
-
-    #     # ? If the resource is "animals", and
-    #     # ? if id is not None/Null, the response will be get_single_animal(id)
-    #     # ? if the response is not None/Null, the request header will be set to 200.
-    #     # ? if the response is None/Null, the request header will be set to 404. and the response will be a message.
-    #     # ? else, the response will be the return value of the get_all_animals method.
-    #     if resource == "customers":
-    #         if id is not None:
-    #             response = get_single_customer(id)
-
-    #             if response is not None:
-    #                 self._set_headers(200)
-
-    #             if response is None:
-    #                 self._set_headers(404)
-    #                 response = {"message": f"Customer-{id} does not exist"}
-
-    #         else:
-    #             response = get_all_customers()
-
-    #     self.wfile.write(json.dumps(response).encode())
 
     #! Here's a method on the class that overrides the parent's method.
     # ? It handles any POST request.
@@ -208,7 +93,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                 and "status" in post_body
             ):
                 self._set_headers(201)
-                new_animal = create_animal(post_body)
+                new_animal = create(resource, post_body)
 
             else:
                 self._set_headers(400)
@@ -224,7 +109,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         if resource == "locations":
             if "name" in post_body and "address" in post_body:
                 self._set_headers(201)
-                new_location = create_location(post_body)
+                new_location = create(resource, post_body)
 
             else:
                 self._set_headers(400)
@@ -240,7 +125,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         if resource == "employees":
             if "name" in post_body:
                 self._set_headers(201)
-                new_employee = create_employee(post_body)
+                new_employee = create(resource, post_body)
 
             else:
                 self._set_headers(400)
@@ -255,7 +140,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         if resource == "customers":
             if "fullName" in post_body and "email" in post_body:
                 self._set_headers(201)
-                new_customer = create_customer(post_body)
+                new_customer = create(resource, post_body)
 
             else:
                 self._set_headers(400)
@@ -275,21 +160,21 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Delete a single animal from the list
         if resource == "animals":
             self._set_headers(204)
-            delete_animal(id)
+            delete(id, resource)
 
         # Encode the new animal and send in response
 
         # Delete a single animal from the list
         elif resource == "locations":
             self._set_headers(204)
-            delete_location(id)
+            delete(id, resource)
 
         # Encode the new animal and send in response
 
         # Delete a single animal from the list
         if resource == "employees":
             self._set_headers(204)
-            delete_employee(id)
+            delete(id, resource)
 
         # Encode the new animal and send in response
 
@@ -297,7 +182,6 @@ class HandleRequests(BaseHTTPRequestHandler):
         if resource == "customers":
             self._set_headers(405)
             delete_response = {"message": "You cannot delete any customer."}
-            # delete_customer(id)
 
         # Encode the new anitmal and send in response
 
@@ -316,28 +200,28 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         # Delete a single animal from the list
         if resource == "animals":
-            update_animal(id, post_body)
+            update(id, post_body, resource)
 
             # Encode the new animal and send in response
             self.wfile.write("".encode())
 
         # Delete a single animal from the list
         if resource == "locations":
-            update_location(id, post_body)
+            update(id, post_body, resource)
 
             # Encode the new animal and send in response
             self.wfile.write("".encode())
 
         # Delete a single animal from the list
         if resource == "employees":
-            update_employee(id, post_body)
+            update(id, post_body, resource)
 
             # Encode the new animal and send in response
             self.wfile.write("".encode())
 
         # Delete a single animal from the list
         if resource == "customers":
-            update_customer(id, post_body)
+            update(id, post_body, resource)
 
             # Encode the new animal and send in response
             self.wfile.write("".encode())
@@ -359,10 +243,12 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         """Sets the options headers"""
         self.send_response(200)
-        # is your domain on the list to access API.
+        # any domain on the internet can send my a request
+        # if I changed the second parameter is locahost/3000, then only
         self.send_header("Access-Control-Allow-Origin", "*")
-        # is user allowed to perform this action on the API.
+        # allows only these methods below to take place.
         self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+        # controlling what headers the client is allowed to put on their request.
         self.send_header(
             "Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Accept"
         )
@@ -380,6 +266,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-#? content type is telling what type of string we are sending. We are always sending a string.
-#? Accept header can control the format in which the client can accept the request.
