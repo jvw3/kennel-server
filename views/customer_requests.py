@@ -4,6 +4,7 @@ from models import Customer
 
 
 def get_all_customers():
+    """function to get all customers"""
     with sqlite3.connect("./kennel.sqlite3") as conn:
 
         # Just use these. It's a Black Box.
