@@ -43,7 +43,7 @@ def get_all_locations():
 
             locations.append(location.__dict__)
 
-    return locations
+    return json.dumps(locations)
 
 
 def get_single_location(id):
@@ -71,7 +71,7 @@ def get_single_location(id):
         # Create an animal instance from the current row
         location = Location(data["id"], data["name"], data["address"])
 
-        return location.__dict__
+        return json.dumps(location.__dict__)
 
 
 def create_location(location):

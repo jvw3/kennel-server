@@ -52,6 +52,7 @@ INSERT INTO `Animal` VALUES (null, "Daps", "Kennel", "Boxer", 2, 2);
 INSERT INTO `Animal` VALUES (null, "Cleo", "Kennel", "Poodle", 2, 2);
 INSERT INTO `Animal` VALUES (null, "Popcorn", "Kennel", "Beagle", 3, 2);
 INSERT INTO `Animal` VALUES (null, "Curly", "Treatment", "Poodle", 4, 2);
+INSERT INTO `Animal` VALUES (null, "Daps", "Kennel", "Boxer", 2, 2);
 
 INSERT INTO `Employee` VALUES (null, "Madi Peper", "35498 Madison Ave", 1);
 INSERT INTO `Employee` VALUES (null, "Kristen Norris", "100 Main St", 1);
@@ -70,3 +71,34 @@ SELECT
     a.customer_id
 FROM animal a
 WHERE a.id = 5
+
+SELECT
+    a.id,
+    a.name,
+    a.breed,
+    a.status,
+    a.location_id,
+    a.customer_id,
+    l.name location_name,
+    l.address location_address,
+	c.name customer_name,
+	c.address customer_address
+FROM Animal a
+JOIN Location l
+    ON l.id = a.location_id
+JOIN Customer c
+	ON c.id = a.customer_id
+
+SELECT
+    e.id,
+    e.name,
+    e.address,
+    e.location_id,
+	l.name location_name,
+	l.address location_address
+FROM employee e
+JOIN Location l
+	ON l.id = e.location_id
+
+
+SELECT * FROM ANIMAL ORDER BY id DESC;

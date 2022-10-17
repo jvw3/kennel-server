@@ -1,6 +1,7 @@
 import sqlite3
 import json
 from models import Employee
+from models import Location
 
 
 EMPLOYEES = [{"id": 1, "name": "Jenna Solis"}]
@@ -17,11 +18,15 @@ def get_all_employees():
         db_cursor.execute(
             """
         SELECT
-            e.id,
-            e.name,
-            e.address,
-            e.location_id
-        FROM employee e
+    e.id,
+    e.name,
+    e.address,
+    e.location_id,
+	l.name location_name,
+	l.address location_address
+FROM employee e
+JOIN Location l
+	ON l.id = e.location_id
         """
         )
 
@@ -42,9 +47,15 @@ def get_all_employees():
                 row["id"], row["name"], row["address"], row["location_id"]
             )
 
+            location = Location(
+                row["id"], row["location_name"], row["location_address"]
+            )
+
+            employee.location = location.__dict__
+
             employees.append(employee.__dict__)
 
-    return employees
+    return json.dumps(employees)
 
 
 def get_single_employee(id):
@@ -75,7 +86,39 @@ def get_single_employee(id):
             data["id"], data["name"], data["address"], data["location_id"]
         )
 
-        return employee.__dict__
+        return json.dumps(employee.__dict__)
+
+
+def get_employee_by_location(location_id):
+
+    with sqlite3.connect("./kennel.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        # Write the SQL query to get the information you want
+        db_cursor.execute(
+            """
+        select
+            e.id,
+            e.name,
+            e.address,
+            e.location_id
+        FROM employee e
+        WHERE e.location_id = ?
+        """,
+            (location_id,),
+        )
+
+        employees = []
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            employee = Employee(
+                row["id"], row["name"], row["address"], row["location_id"]
+            )
+            employees.append(employee.__dict__)
+
+    return json.dumps(employees)
 
 
 def create_employee(employee):
